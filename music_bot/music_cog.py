@@ -72,7 +72,7 @@ class music_cog(commands.Cog):
             self.vc.resume()
         else:
             song = self.search_yt(query)
-            if isinstance(type(song), bool):
+            if type(song) == type(False):
                 await ctx.send("Could not download the song. Incorrect format, try a different keyword!")
             else:
                 await ctx.send("Song added to the queue")
