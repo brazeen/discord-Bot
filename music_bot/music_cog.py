@@ -72,7 +72,7 @@ class music_cog(commands.Cog):
             self.vc.resume()
         else:
             song = self.search_yt(query)
-            if type(song) == type(True):
+            if isinstance(type(song), bool):
                 await ctx.send("Could not download the song. Incorrect format, try a different keyword!")
             else:
                 await ctx.send("Song added to the queue")
@@ -105,6 +105,7 @@ class music_cog(commands.Cog):
             self.vc.stop()
             await self.play_music(ctx)
 
+    # TODO: List queue in a better way
     @commands.command(name="queue", aliases=['q'], help='Shows current song queue')
     async def queue(self, ctx):
         retval = ""

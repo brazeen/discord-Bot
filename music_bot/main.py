@@ -9,7 +9,8 @@ intents = discord.Intents.all()
 intents.message_content = True
 intents.voice_states = True
 
-bot = commands.Bot(command_prefix="penis ", intents=intents)
+PREFIX = "penis "
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 bot.remove_command("help")
 
 
