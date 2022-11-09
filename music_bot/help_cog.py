@@ -1,5 +1,5 @@
-import discord
 from discord.ext import commands
+
 
 class help_cog(commands.Cog):
     def __init__(self, bot):
@@ -34,5 +34,5 @@ penis clear - clears the queue
             await text_channel.send(msg)
 
     @commands.command(name="help", help="Displays all the available commands")
-    async def help(self, ctx,):
+    async def help(self, ctx, ):
         await ctx.send(self.help_message)
