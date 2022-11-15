@@ -1,5 +1,8 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
+
+import constants
 
 
 class help_cog(commands.Cog):
@@ -7,11 +10,12 @@ class help_cog(commands.Cog):
         self.bot = bot
         self.text_channel_text = []
 
-    @commands.command(name="help", help="Displays all the available commands")
-    async def help(self, ctx):
-        embed = discord.Embed(title="Help", color=0x00ffb7)  # TODO: Change to random colour
-        embed.set_footer(text=f"Requested by: {ctx.message.author.name}",
-                         icon_url=ctx.message.author.avatar)
+    @app_commands.command(name="help", description="Displays all the available commands")
+    async def help(self, interaction: discord.Interaction):
+        # TODO: Change to random colour
+        embed = discord.Embed(title="Help", color=0x00ffb7)
+        embed.set_footer(text=f"Requested by: {interaction.user.name}",
+                         icon_url=interaction.user.avatar)
 
         embed.add_field(name="penis help",
                         value="Displays all the available commands",
@@ -38,4 +42,9 @@ class help_cog(commands.Cog):
                         value="Clears the queue",
                         inline=False)
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
+
+
+async def setup(bot: commands.Bot) -> None:
+    """ Setup cog on bot """
+    await bot.add_cog(help_cog(bot), guilds=[discord.Object(id=constants.GUILD_ID)])

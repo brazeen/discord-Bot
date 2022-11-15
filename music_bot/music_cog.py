@@ -1,7 +1,10 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
 
 from youtube_dl import YoutubeDL
+
+import constants
 
 
 class music_cog(commands.Cog):
@@ -21,7 +24,8 @@ class music_cog(commands.Cog):
     def search_yt(self, item):
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
             try:
-                info = ydl.extract_info("ytsearch:%s" % item, download=False)['entries'][0]
+                info = ydl.extract_info("ytsearch:%s" %
+                                        item, download=False)['entries'][0]
             except Exception:
                 return False
 
@@ -35,11 +39,12 @@ class music_cog(commands.Cog):
 
             self.music_queue.pop(0)
 
-            self.vc.play(discord.FFmpegPCMAudio(m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
+            self.vc.play(discord.FFmpegPCMAudio(
+                m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
         else:
             self.is_playing = False
 
-    async def play_music(self, ctx):
+    async def play_music(self, interaction: discord.Interaction):
         if len(self.music_queue) > 0:
             self.is_playing = True
             m_url = self.music_queue[0][0]['source']
@@ -48,7 +53,7 @@ class music_cog(commands.Cog):
                 self.vc = await self.music_queue[0][1].connect()
 
                 if self.vc is None:
-                    await ctx.send("Could not connect to the voice channel")
+                    await interaction.response.send_message("Could not connect to the voice channel")
                     return
 
             else:
@@ -56,33 +61,35 @@ class music_cog(commands.Cog):
 
             self.music_queue.pop(0)
 
-            self.vc.play(discord.FFmpegPCMAudio(m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
+            self.vc.play(discord.FFmpegPCMAudio(
+                m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
 
         else:
             self.is_playing = False
 
-    @commands.command(name="play", aliases=["p", "playing"], help="Play the selected song from youtube")
-    async def play(self, ctx, *args):
-        query = " ".join(args)
+    @app_commands.command(name="play", description="Play the selected song from YouTube")
+    async def play(self, interaction: discord.Interaction, query: str):
+        try:
+            voice_channel = interaction.user.voice.channel
+        except AttributeError:
+            await interaction.response.send_message("Connect to a voice channel!")
+            return  # Return from function to prevent code below from getting executed
 
-        voice_channel = ctx.author.voice.channel
-        if voice_channel is None:
-            await ctx.send("Connect to a voice channel!")
-        elif self.is_Paused:
+        if self.is_Paused:
             self.vc.resume()
         else:
             song = self.search_yt(query)
             if type(song) == type(False):
-                await ctx.send("Could not download the song. Incorrect format, try a different keyword!")
+                await interaction.response.send_message("Could not download the song. Incorrect format, try a different keyword!")
             else:
-                await ctx.send("Song added to the queue")
+                await interaction.response.send_message("Song added to the queue")
                 self.music_queue.append([song, voice_channel])
 
                 if not self.is_playing:
-                    await self.play_music(ctx)
+                    await self.play_music(interaction)
 
-    @commands.command(name="pause", help="Pauses the current song being played")
-    async def pause(self, ctx, *args):
+    @app_commands.command(name="pause", description="Pause the current song that is being played")
+    async def pause(self, interaction: discord.Interaction):
         if self.is_playing:
             self.is_playing = False
             self.is_Paused = True
@@ -92,22 +99,22 @@ class music_cog(commands.Cog):
             self.is_Paused = False
             self.vc.resume()
 
-    @commands.command(name="resume", aliases=['r'], help='Resumes playing the current song')
-    async def resume(self, ctx, *args):
+    @app_commands.command(name="resume", description="Resumes playing the current song")
+    async def resume(self, interaction: discord.Interaction):
         if self.is_Paused:
             self.is_playing = True
             self.is_Paused = False
             self.vc.resume()
 
-    @commands.command(name="skip", aliases=['s'], help='Skips the current song')
-    async def skip(self, ctx, *args):
+    @app_commands.command(name="skip", description="Skips the current song")
+    async def skip(self, interaction: discord.Interaction):
         if self.vc is not None and self.vc:
             self.vc.stop()
-            await self.play_music(ctx)
+            await self.play_music(interaction)
 
     # TODO: List queue in a better way
-    @commands.command(name="queue", aliases=['q'], help='Shows current song queue')
-    async def queue(self, ctx):
+    @app_commands.command(name="queue", description="Shows current song queue")
+    async def queue(self, interaction: discord.Interaction):
         retval = ""
 
         for i in range(0, len(self.music_queue)):
@@ -117,19 +124,24 @@ class music_cog(commands.Cog):
             retval += self.music_queue[i][0]['title'] + '\n'
 
         if retval != "":
-            await ctx.send(retval)
+            await interaction.response.send_message(retval)
         else:
-            await ctx.send("No music in the queue.")
+            await interaction.response.send_message("No music in the queue.")
 
-    @commands.command(name="clear", aliases=['c'], help='Stops playing the current song and clears the queue')
-    async def clear(self, ctx, *args):
+    @app_commands.command(name="clear", description="Stops playing the current song and clears the queue")
+    async def clear(self, interaction: discord.Interaction):
         if self.vc is not None and self.is_playing:
             self.vc.stop()
         self.music_queue = []
-        await ctx.send("Music queue cleared")
+        await interaction.response.send_message("Music queue cleared")
 
-    @commands.command(name="leave", aliases=['disconnect', 'l', 'd'], help='Leaves the voice channel')
-    async def leave(self, ctx):
+    @app_commands.command(name="leave", description="Leaves the voice channel")
+    async def leave(self, interaction: discord.Interaction):
         self.is_playing = False
         self.is_Paused = False
         await self.vc.disconnect()
+
+
+async def setup(bot: commands.Bot) -> None:
+    """ Setup cog on bot """
+    await bot.add_cog(music_cog(bot), guilds=[discord.Object(constants.GUILD_ID)])
