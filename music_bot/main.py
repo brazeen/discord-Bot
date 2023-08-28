@@ -15,7 +15,7 @@ class MusicBot(commands.Bot):
     def __init__(self) -> None:
         """ Initialises bot """
         super().__init__(
-            command_prefix="penis ",
+            command_prefix="pls ",
             intents=intents,
             application_id=constants.APP_ID
         )
