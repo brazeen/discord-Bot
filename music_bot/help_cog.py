@@ -17,28 +17,28 @@ class help_cog(commands.Cog):
         embed.set_footer(text=f"Requested by: {interaction.user.name}",
                          icon_url=interaction.user.avatar)
 
-        embed.add_field(name="penis help",
+        embed.add_field(name="pls help",
                         value="Displays all the available commands",
                         inline=False)
-        embed.add_field(name="penis play (query)",
+        embed.add_field(name="pls play (query)",
                         value="Plays music from the query",
                         inline=False)
-        embed.add_field(name="penis pause",
+        embed.add_field(name="pls pause",
                         value="Pauses/Unpauses music",
                         inline=False)
-        embed.add_field(name="penis queue",
+        embed.add_field(name="pls queue",
                         value="Displays music queue",
                         inline=False)
-        embed.add_field(name="penis leave",
+        embed.add_field(name="pls leave",
                         value="Leaves the voice channel",
                         inline=False)
-        embed.add_field(name="penis resume",
+        embed.add_field(name="pls resume",
                         value="Resumes playing the music",
                         inline=False)
-        embed.add_field(name="penis skip",
+        embed.add_field(name="pls skip",
                         value="Skips the current song being played",
                         inline=False)
-        embed.add_field(name="penis clear",
+        embed.add_field(name="pls clear",
                         value="Clears the queue",
                         inline=False)
 
